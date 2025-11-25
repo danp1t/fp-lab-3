@@ -1,8 +1,10 @@
 defmodule Interpolation.Output do
   def print_results(results) do
-    Enum.each(results, fn {alg, x, y} ->
+    results
+    |> Stream.each(fn {alg, x, y} ->
       IO.puts("#{alg}: #{format(x)} #{format(y)}")
     end)
+    |> Stream.run()
   end
 
   defp format(num) do

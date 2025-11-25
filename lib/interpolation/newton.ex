@@ -4,7 +4,10 @@ defmodule Interpolation.Newton do
       :error
     else
       interpolation_points = select_interpolation_points(points, x, n)
-      calculate_newton(x, interpolation_points)
+
+      interpolation_points
+      |> build_difference_table()
+      |> evaluate_polynomial_stream(x, interpolation_points)
     end
   end
 
@@ -13,17 +16,6 @@ defmodule Interpolation.Newton do
     |> Enum.sort_by(fn {px, _py} -> abs(px - target_x) end)
     |> Enum.take(n)
     |> Enum.sort_by(fn {px, _py} -> px end)
-  end
-
-  defp calculate_newton(x, points) do
-    try do
-      n = length(points)
-      table = build_difference_table(points)
-      result = evaluate_polynomial(x, points, table)
-      {:ok, result}
-    rescue
-      _ -> :error
-    end
   end
 
   defp build_difference_table(points) do
@@ -47,15 +39,21 @@ defmodule Interpolation.Newton do
     end)
   end
 
-  defp evaluate_polynomial(x, points, table) do
-    n = length(points)
-    result = Enum.at(Enum.at(table, 0), 0)
-    product = 1.0
+  defp evaluate_polynomial_stream(table, x, points) do
+    try do
+      n = length(points)
+      result = Enum.at(Enum.at(table, 0), 0)
+      product = 1.0
 
-    Enum.reduce(1..(n-1), result, fn i, acc ->
-      {xi, _} = Enum.at(points, i-1)
-      product = product * (x - xi)
-      acc + Enum.at(Enum.at(table, 0), i) * product
-    end)
+      final_result = Enum.reduce(1..(n-1), result, fn i, acc ->
+        {xi, _} = Enum.at(points, i-1)
+        product = product * (x - xi)
+        acc + Enum.at(Enum.at(table, 0), i) * product
+      end)
+
+      {:ok, final_result}
+    rescue
+      _ -> :error
+    end
   end
 end
