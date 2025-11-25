@@ -1,31 +1,17 @@
 defmodule Interpolation.CLI do
   def main(args) do
-    case OptionParser.parse(args,
-      switches: [
-        linear: :boolean,
-        newton: :integer,
-        step: :float,
-        help: :boolean
-      ],
-      aliases: [
-        l: :linear,
-        n: :newton,
-        s: :step,
-        h: :help
-      ]
-    ) do
-      {opts, _, []} ->
-        has_algorithm = opts[:linear] || !is_nil(opts[:newton])
+    {opts, _, errors} = OptionParser.parse(args,
+      switches: [linear: :boolean, newton: :integer, step: :float, help: :boolean],
+      aliases: [l: :linear, n: :newton, s: :step, h: :help]
+    )
 
-        if opts[:help] || !has_algorithm do
-          print_help()
-        else
-          start_interpolation(opts)
-        end
-
-      {_opts, _args, errors} ->
+    cond do
+      opts[:help] -> print_help()
+      errors != [] ->
         IO.puts("Error parsing arguments: #{inspect errors}")
         print_help()
+      is_nil(opts[:linear]) and is_nil(opts[:newton]) -> print_help()
+      true -> start_interpolation(opts)
     end
   end
 
@@ -37,17 +23,11 @@ defmodule Interpolation.CLI do
   defp print_help do
     IO.puts("""
     Usage: interpolation [OPTIONS]
-
     Options:
-      -l, --linear          Use linear interpolation
-      -n, --newton N        Use Newton interpolation with N points
-      -s, --step STEP       Step for output points (default: 0.1)
-      -h, --help            Show this help
-
-    Examples:
-      cat data.csv | interpolation --linear --step 0.5
-      cat data.csv | interpolation --newton 4 --step 0.2
-      cat data.csv | interpolation --linear --newton 3 --step 0.1
+      -l, --linear    Use linear interpolation
+      -n, --newton N  Use Newton interpolation with N points
+      -s, --step STEP Step size (default: 0.1)
+      -h, --help      Show this help
     """)
   end
 end

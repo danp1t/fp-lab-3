@@ -1,16 +1,11 @@
 defmodule Interpolation.Output do
   def print_results(results) do
-    Enum.each(results, fn {algorithm, x, y} ->
-      IO.puts("#{algorithm}: #{format_float(x)} #{format_float(y)}")
+    Enum.each(results, fn {alg, x, y} ->
+      IO.puts("#{alg}: #{format(x)} #{format(y)}")
     end)
   end
 
-  defp format_float(value) do
-    if round(value) == value do
-      Integer.to_string(round(value))
-    else
-      formatted = :io_lib.format("~.6f", [value]) |> List.to_string()
-      formatted |> String.trim_trailing("0") |> String.trim_trailing(".")
-    end
+  defp format(num) do
+    if num == round(num), do: Integer.to_string(round(num)), else: Float.to_string(num)
   end
 end
