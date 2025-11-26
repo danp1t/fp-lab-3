@@ -117,3 +117,108 @@ newton: 6 6
 newton: 6.5 6.5
 ```
 
+### Описание алгоритма. Линейная интерполяция
+```elixir
+def interpolate(x, points) do
+    points = Enum.sort(points)
+
+    Enum.reduce_while(points, nil, fn {x2, y2}, prev ->
+      case prev do
+        nil ->
+          {:cont, {x2, y2}}
+
+        {x1, y1} when x >= x1 and x <= x2 ->
+          y = y1 + (y2 - y1) * (x - x1) / (x2 - x1)
+          {:halt, {:ok, y}}
+
+        _ ->
+          {:cont, {x2, y2}}
+      end
+```
+### Описание алгоритма. Метод Ньютона
+Построение таблицы конечных разностей
+```elixir
+defp build_difference_table(points) do
+    n = length(points)
+    initial_table = for i <- 0..(n - 1), do: [elem(Enum.at(points, i), 1)]
+
+    Enum.reduce(1..(n - 1), initial_table, &build_table_row(&1, &2, points, n))
+  end
+```
+
+Полином Ньютона
+```elixir
+defp evaluate_polynomial(table, x, points) do
+    try do
+      n = length(points)
+      result = Enum.at(Enum.at(table, 0), 0)
+      product = 1.0
+
+      final_result =
+        Enum.reduce(1..(n - 1), {result, product}, fn i, {acc, prod} ->
+          {xi, _} = Enum.at(points, i - 1)
+          new_product = prod * (x - xi)
+          new_acc = acc + Enum.at(Enum.at(table, 0), i) * new_product
+          {new_acc, new_product}
+        end)
+
+      {:ok, elem(final_result, 0)}
+end
+```
+
+### Input
+```elixir
+def read_loop(server_pid) do
+    case IO.read(:line) do
+      :eof ->
+        GenServer.cast(server_pid, :eof)
+
+      line ->
+        line |> String.trim() |> process_line(server_pid)
+        read_loop(server_pid)
+    end
+  end
+```
+
+### Output
+```elixir
+def print_results(results) do
+    results
+    |> Stream.each(fn {alg, x, y} ->
+      IO.puts("#{alg}: #{format(x)} #{format(y)}")
+    end)
+    |> Stream.run()
+  end
+```
+### GenServer
+Инициализация
+```elixir
+def init(opts) do
+    state = %{
+      points: [],
+      algorithms: init_algorithms(opts),
+      step: opts[:step] || 0.1,
+      newton_n: opts[:newton] || 3
+    }
+
+    {:ok, state}
+end
+```
+Отправка сообщений
+```elixir
+def handle_cast({:add_point, point}, state) do
+    new_points = [point | state.points] |> Enum.sort()
+
+    results =
+      state.algorithms
+      |> Enum.flat_map(&calculate_points(&1, new_points, state))
+
+    Interpolation.Output.print_results(results)
+    {:noreply, %{state | points: new_points}}
+  end
+
+def handle_cast(:eof, state) do
+    {:stop, :normal, state}
+end
+```
+
