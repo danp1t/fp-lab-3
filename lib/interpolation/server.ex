@@ -12,6 +12,7 @@ defmodule Interpolation.Server do
       step: opts[:step] || 0.1,
       newton_n: opts[:newton] || 3
     }
+
     {:ok, state}
   end
 

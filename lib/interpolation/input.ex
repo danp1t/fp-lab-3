@@ -1,7 +1,9 @@
 defmodule Interpolation.Input do
   def read_loop(server_pid) do
     case IO.read(:line) do
-      :eof -> GenServer.cast(server_pid, :eof)
+      :eof ->
+        GenServer.cast(server_pid, :eof)
+
       line ->
         line |> String.trim() |> process_line(server_pid)
         read_loop(server_pid)
@@ -9,6 +11,7 @@ defmodule Interpolation.Input do
   end
 
   defp process_line("", _), do: :ok
+
   defp process_line(line, server_pid) do
     case String.split(line) do
       [x_str, y_str] ->
@@ -16,9 +19,11 @@ defmodule Interpolation.Input do
              {y, ""} <- Float.parse(y_str) do
           GenServer.cast(server_pid, {:add_point, {x, y}})
         else
-          _ -> IO.puts(:stderr, "Error: Invalid numbers")
+          _ -> IO.puts(:stderr, "Ошибка: Введите число")
         end
-      _ -> IO.puts(:stderr, "Error: Need two numbers per line")
+
+      _ ->
+        IO.puts(:stderr, "Ошибка: На каждой линии должна быть пара чисел")
     end
   end
 end

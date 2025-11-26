@@ -20,15 +20,15 @@ defmodule Interpolation.Newton do
 
   defp build_difference_table(points) do
     n = length(points)
-    initial_table = for i <- 0..(n-1), do: [elem(Enum.at(points, i), 1)]
+    initial_table = for i <- 0..(n - 1), do: [elem(Enum.at(points, i), 1)]
 
-    Enum.reduce(1..(n-1), initial_table, fn j, table ->
-      for i <- 0..(n-1-j) do
+    Enum.reduce(1..(n - 1), initial_table, fn j, table ->
+      for i <- 0..(n - 1 - j) do
         {xi, _} = Enum.at(points, i)
         {xij, _} = Enum.at(points, i + j)
 
-        prev_val = Enum.at(Enum.at(table, i), j-1)
-        next_val = Enum.at(Enum.at(table, i+1), j-1)
+        prev_val = Enum.at(Enum.at(table, i), j - 1)
+        next_val = Enum.at(Enum.at(table, i + 1), j - 1)
 
         (next_val - prev_val) / (xij - xi)
       end
@@ -45,11 +45,12 @@ defmodule Interpolation.Newton do
       result = Enum.at(Enum.at(table, 0), 0)
       product = 1.0
 
-      final_result = Enum.reduce(1..(n-1), result, fn i, acc ->
-        {xi, _} = Enum.at(points, i-1)
-        product = product * (x - xi)
-        acc + Enum.at(Enum.at(table, 0), i) * product
-      end)
+      final_result =
+        Enum.reduce(1..(n - 1), result, fn i, acc ->
+          {xi, _} = Enum.at(points, i - 1)
+          product = product * (x - xi)
+          acc + Enum.at(Enum.at(table, 0), i) * product
+        end)
 
       {:ok, final_result}
     rescue
