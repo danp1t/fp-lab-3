@@ -58,4 +58,62 @@ o o o o o o . . x x x
 - `.` -- точки, задействованные в рассчете значения `o`.
 - `x` -- точки, расчёт которых для "окон" не требуется.
 
-### Пример вычислений
+### Пример вычислений #1. Линейная интерполяция
+```bash
+./interpolation -l -s 0.7
+0 0
+1 1
+linear: 0 0
+linear: 0.7 0.7
+2 2
+linear: 0 0
+linear: 0.7 0.7
+linear: 1.4 1.4
+3 3
+linear: 0 0
+linear: 0.7 0.7
+linear: 1.4 1.4
+linear: 2.0999999999999996 2.0999999999999996
+linear: 2.8 2.8
+```
+
+### Пример вычислений #2. Метод Ньютона
+```bash
+./interpolation -n 5 -s 0.5
+0 0
+1 1
+2 2
+3 3
+4 4
+newton: 0 0
+newton: 0.5 0.5
+newton: 1 1
+newton: 1.5 1.5
+newton: 2 2
+newton: 2.5 2.5
+newton: 3 3
+newton: 3.5 3.5
+newton: 4 4
+5 5
+newton: 1 1
+newton: 1.5 1.5
+newton: 2 2
+newton: 2.5 2.5
+newton: 3 3
+newton: 3.5 3.5
+newton: 4 4
+newton: 4.5 4.5
+newton: 5 5
+7 7
+newton: 2 2
+newton: 2.5 2.5
+newton: 3 3
+newton: 3.5 3.5
+newton: 4 4
+newton: 4.5 4.5
+newton: 5 5
+newton: 5.5 5.5
+newton: 6 6
+newton: 6.5 6.5
+```
+
