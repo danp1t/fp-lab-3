@@ -1,4 +1,8 @@
 defmodule Interpolation.CLI do
+  @moduledoc """
+  Командный интерфейс для программы интерполяции.
+  Обрабатывает аргументы командной строки и запускает соответствующие алгоритмы.
+  """
   def main(args) do
     {opts, _, errors} =
       OptionParser.parse(args,

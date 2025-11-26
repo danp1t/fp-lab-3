@@ -1,4 +1,8 @@
 defmodule Interpolation.Linear do
+  @moduledoc """
+  Реализация линейной интерполяции между точками.
+  Автоматически сортирует точки и находит интервал для интерполяции.
+  """
   def interpolate(x, points) do
     points = Enum.sort(points)
 

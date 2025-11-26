@@ -1,4 +1,8 @@
 defmodule Interpolation.Input do
+  @moduledoc """
+  Модуль для чтения и парсинга входных данных.
+  Обрабатывает потоковый ввод из STDIN и валидирует формат данных.
+  """
   def read_loop(server_pid) do
     case IO.read(:line) do
       :eof ->

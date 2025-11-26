@@ -1,4 +1,7 @@
 defmodule Interpolation.Output do
+  @moduledoc """
+  Модуль для форматирования и вывода результатов интерполяции.
+  """
   def print_results(results) do
     results
     |> Stream.each(fn {alg, x, y} ->
