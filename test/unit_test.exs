@@ -24,7 +24,7 @@ defmodule InterpolationTest do
 
   test "interpolates with three points" do
     points = [{0.0, 0.0}, {1.0, 1.0}, {2.0, 4.0}]
-    assert Interpolation.Newton.interpolate(1.5, points, 3) == {:ok, 2.0}
+    assert Interpolation.Newton.interpolate(1.5, points, 3) == {:ok, 2.25}
   end
 
   test "returns error when not enough points" do

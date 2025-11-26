@@ -1,4 +1,9 @@
 defmodule Interpolation.Server do
+  @moduledoc """
+  GenServer для управления состоянием интерполяции и координации вычислений.
+  Обрабатывает добавление точек данных и запуск алгоритмов интерполяции.
+  """
+
   use GenServer
 
   def start_link(opts) do
@@ -40,18 +45,7 @@ defmodule Interpolation.Server do
 
   defp calculate_points(:linear, points, state) do
     if length(points) >= 2 do
-      [{min_x, _} | _] = points
-      [{max_x, _} | _] = Enum.reverse(points)
-
-      min_x
-      |> Stream.iterate(&(&1 + state.step))
-      |> Stream.take_while(&(&1 <= max_x))
-      |> Enum.flat_map(fn x ->
-        case Interpolation.Linear.interpolate(x, points) do
-          {:ok, y} -> [{"linear", x, y}]
-          :error -> []
-        end
-      end)
+      calculate_linear_points(points, state.step)
     else
       []
     end
@@ -59,21 +53,46 @@ defmodule Interpolation.Server do
 
   defp calculate_points(:newton, points, state) do
     if length(points) >= state.newton_n do
-      newton_points = Enum.take(points, -state.newton_n) |> Enum.sort()
-      [{min_x, _} | _] = newton_points
-      [{max_x, _} | _] = Enum.reverse(newton_points)
-
-      min_x
-      |> Stream.iterate(&(&1 + state.step))
-      |> Stream.take_while(&(&1 <= max_x))
-      |> Enum.flat_map(fn x ->
-        case Interpolation.Newton.interpolate(x, newton_points, state.newton_n) do
-          {:ok, y} -> [{"newton", x, y}]
-          :error -> []
-        end
-      end)
+      calculate_newton_points(points, state.step, state.newton_n)
     else
       []
+    end
+  end
+
+  defp calculate_linear_points(points, step) do
+    [{min_x, _} | _] = points
+    [{max_x, _} | _] = Enum.reverse(points)
+
+    min_x
+    |> Stream.iterate(&(&1 + step))
+    |> Stream.take_while(&(&1 <= max_x))
+    |> Stream.flat_map(&interpolate_linear(&1, points))
+    |> Enum.to_list()
+  end
+
+  defp interpolate_linear(x, points) do
+    case Interpolation.Linear.interpolate(x, points) do
+      {:ok, y} -> [{"linear", x, y}]
+      :error -> []
+    end
+  end
+
+  defp calculate_newton_points(points, step, newton_n) do
+    newton_points = Enum.take(points, -newton_n) |> Enum.sort()
+    [{min_x, _} | _] = newton_points
+    [{max_x, _} | _] = Enum.reverse(newton_points)
+
+    min_x
+    |> Stream.iterate(&(&1 + step))
+    |> Stream.take_while(&(&1 <= max_x))
+    |> Stream.flat_map(&interpolate_newton(&1, newton_points, newton_n))
+    |> Enum.to_list()
+  end
+
+  defp interpolate_newton(x, newton_points, newton_n) do
+    case Interpolation.Newton.interpolate(x, newton_points, newton_n) do
+      {:ok, y} -> [{"newton", x, y}]
+      :error -> []
     end
   end
 end
